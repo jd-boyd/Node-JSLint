@@ -38,26 +38,26 @@ var jslint_file,
 function init()
 {
 	var i;
-	
+
 	argv.shift();	// drop "node"
 	argv.shift();	// drop this script's name
-	
+
 	jslint_file = fs.readFileSync(jslint_file_path, 'utf8');
-	
+
 	eval(jslint_file);
-	
+
 	i = argv.indexOf('--list');
 	if(i !== -1)
 	{
 		simple = true;
 		argv.splice(i, 1);
 	}
-	
+
 	if(!argv[0])
 	{
-		sys.puts("\x1B[33mUsage: node JSLint [--list] file.js [file2.js file3.js ...]");
-		sys.puts("\x1B[33mUsage: ./JSLint [--list] file.js [file2.js file3.js ...]");
-		sys.puts("\x1B[33mUsage: ./JSLint [--list] *.js\n");
+		sys.puts("Usage: node JSLint [--list] file.js [file2.js file3.js ...]");
+		sys.puts("Usage: ./JSLint [--list] file.js [file2.js file3.js ...]");
+		sys.puts("Usage: ./JSLint [--list] *.js\n");
 		process.exit(1);
 	}
 	for(i = 0; i < argv.length; i++)
@@ -70,18 +70,18 @@ function init()
 function parseFile(JSLINT, fileToParse)
 {
 	var e, i, data, numErrors;
-	
+
 	if(!path.existsSync(fileToParse))
 	{
-		sys.puts("\x1B[31mJSLint: Couldn't open file '" + fileToParse + "'.\n");
+		sys.puts("JSLint: Couldn't open file '" + fileToParse + "'.\n");
 		process.exit(1);
 	}
-		
+
 	data = fs.readFileSync(fileToParse);
-	
+
 	if ( !JSLINT( data.toString(), defaults ) )
 	{
-		sys.puts('>'+fileToParse+' -\x1B[31m '+JSLINT.errors.length+' problem(s) found\x1B[0m');
+		sys.puts('>'+fileToParse+' - '+JSLINT.errors.length+' problem(s) found\x1B[0m');
 		if(!simple)
 		{
 			sys.puts('');
@@ -91,7 +91,7 @@ function parseFile(JSLINT, fileToParse)
 				if ( e )
 				{
 					sys.puts(
-						'	\x1B[33mLine ' + e.line + ', Column: ' +
+						'	Line ' + e.line + ', Column: ' +
 						e.character + ': ' + e.reason + '\x1B[0m'
 					);
 					sys.puts(
@@ -103,7 +103,7 @@ function parseFile(JSLINT, fileToParse)
 	}
 	else
 	{
-		sys.puts('>'+fileToParse+' -\x1B[32m No problems found\x1B[0m');
+		sys.puts('>'+fileToParse+' - No problems found');
 		//process.exit( 0 );
 	}
 }
@@ -119,31 +119,30 @@ else
 		url = require('url'),
 		options = url.parse('https://raw.github.com/douglascrockford/JSLint/master/jslint.js'),
 		req;
-	
-	sys.puts('\x1B[31mJSLint base file\x1B[0m ('+jslint_file_name+') \x1B[31mnot exists\x1B[0m');
-	sys.puts('\x1B[31mDownloading JSLint from '+options.href+' ...\x1B[0m');
-	
-	
+
+	sys.puts('JSLint base file ('+jslint_file_name+') not exists');
+	sys.puts('Downloading JSLint from '+options.href+' ...');
+
 	req = https.request(options, function(res)
 	{
 		//console.log('STATUS: ' + res.statusCode);
 		res.setEncoding('utf8');
-		
+
 		var data = '';
 		res.on('data', function (chunk) {
 			data += chunk;
 		});
 		res.on('end', function(){
-			sys.puts('\x1B[32mDownload completed\x1B[0m\n');
+			sys.puts('Download completed\n');
 			fs.writeFileSync(jslint_file_path, data, 'utf8');
 			init();
 		});
 	});
-	
+
 	req.on('error', function(e)
 	{
 		console.log('problem with request: ' + e.message);
 	});
-	
+
 	req.end();
 }
